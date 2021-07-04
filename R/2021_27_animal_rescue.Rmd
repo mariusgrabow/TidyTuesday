@@ -1,0 +1,149 @@
+---
+title: "2021-27_animal_rescue"
+author: "Marius Grabow"
+date: "4 7 2021"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo = TRUE,
+  message = FALSE,
+  warning = FALSE,
+  res = 500,
+  retina = 1
+  )
+```
+
+
+```{r cars}
+package.list=c("tidyverse",
+               "here",
+               "lubridate",
+               "chron",
+               "ggdist",
+               "ggridges",
+               "wesanderson",
+               "extrafont",
+               "ggforce")
+
+for (package in package.list) {
+  if (!require(package, character.only=T, quietly=T)) {
+    install.packages(package)
+    library(package, character.only=T)
+  }
+}
+```
+
+```{r}
+rescues<-readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-06-29/animal_rescues.csv')%>%
+  
+  separate(`date_time_of_call`,
+           c('Date','Time'),
+           sep = ' ',
+           extra = 'merge'
+           )%>%
+  rename(animal=animal_group_parent)%>%
+  mutate(t=lubridate::hm(Time))%>%
+  mutate(animal=str_to_sentence(animal))%>%
+  mutate(animal=if_else(animal =="Bird",animal,"Not_Bird"))%>%
+  mutate(animal_num=case_when(
+    animal=="Bird"~"1",
+    animal=="Not_Bird"~"2")
+)
+  
+
+ggplot(rescues, aes(
+  x=t,
+  y=animal_num,
+  alpha=1,
+  fill=animal_num))+
+  geom_density_ridges(
+    scale=0.9,
+    quantiles=2,
+    alpha=0.5,
+    color = "#808080",
+    show.legend = F
+  )+
+  scale_x_time()+
+  geom_boxplot(
+    aes(
+      x=t,
+      y=1.5
+    ),
+    notch=T,
+    notchwidth = 0.1,
+    outlier.colour = NULL,
+    show.legend = F,
+    width=0.5,
+    position = position_dodge(2),
+    color="darkgoldenrod2",
+    alpha=0,
+    lwd=1.2
+  )+
+  geom_point(
+    aes(x = 5,
+        y = 3),
+    size=150,
+    show.legend = F,
+    fill=NA,
+    colour="darkgoldenrod2"
+  )+
+  scale_fill_manual(
+    values = c("#FFCCCC","#FFE5CC")
+  )+
+  theme(
+    panel.background = element_rect(fill = "#404040"),
+    panel.grid.major = element_line(
+      colour = 'darkgoldenrod2',
+      linetype = 'dashed'),
+    panel.grid.minor = element_blank(),
+    plot.background = element_rect(fill = "#404040"),
+    text=element_text(colour="darkgoldenrod2",
+                      family = "Courier New"),
+    axis.text.y = element_blank(),
+    axis.title.y = element_blank(),
+    axis.title.x = element_blank(),
+    axis.text.x = element_text(
+      colour="darkgoldenrod2",
+      family = "Courier New")
+  )+
+  annotate("text",
+           x=0.1,
+           y=2.8,
+           size=5,
+           family="Courier New",
+           label = "\nEarly birds might catch\n some worms,\nbut get in trouble around\n the same time as other\n animals do"
+  )+
+  annotate("text",
+           x=0.1,
+           y=1.25,
+           size=15,
+           family="Courier New",
+           label = "Not a bird",
+           color="darkgoldenrod2"
+  )+
+  annotate("text",
+           x=0.1,
+           y=2.1,
+           size=15,
+           family="Courier New",
+           label = "Bird",
+           color="darkgoldenrod2"
+  )+
+  labs(
+    caption = "Data description: Rescues of animals by The London Fire Brigade\nData source: London.gov | Figure: Marius Grabow"
+  )
+
+ggsave(here("plots","2021_27_animal_rescue.png"),width = 15, height = 9)
+  
+```
+
+
+
+```{r session}
+sessionInfo()
+```
+
