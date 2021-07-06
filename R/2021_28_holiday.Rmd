@@ -1,0 +1,98 @@
+---
+title: "2021_28_holidays"
+author: "Marius Grabow"
+date: "6 7 2021"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+package.list=c("tidyverse",
+               "here",
+               "wesanderson",
+               "lubridate",
+               "countrycode",
+               "gtable",
+               "grid",
+               "gridExtra",
+               "ggpubr")
+
+for (package in package.list) {
+  if (!require(package, character.only=T, quietly=T)) {
+    install.packages(package)
+    library(package, character.only=T)
+  }
+}
+```
+
+```{r prepare}
+today<-"2021-07-06"
+
+holiday<-readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-07-06/holidays.csv')%>% 
+  filter(!is.na(date_parsed))%>%
+  mutate(as.Date.character(date_parsed))%>%
+  mutate(ind_days=interval(date_parsed,
+                           today)/days(1))
+
+#pipe is not working here?
+holiday$Continent<-countrycode(sourcevar=holiday$country,
+         origin="country.name",
+         destination="continent")
+
+holiday$Continent[is.na(holiday$Continent)]<-"Oceania"
+
+unique(holiday$Continent)
+```
+
+```{r}
+
+
+plot<-holiday%>%
+  group_by(Continent)%>%
+  ggplot(aes(country,ind_days))+
+  geom_bar(stat="identity", fill=alpha("darkgoldenrod2", 1))+
+  ylim(0,270000)+
+  geom_hline(aes(yintercept=50000),color="darkgoldenrod2",
+             alpha=0.2)+
+  geom_hline(aes(yintercept=150000),color="darkgoldenrod2",
+             alpha=0.2)+
+  geom_hline(aes(yintercept=250000),color="darkgoldenrod2",
+             alpha=0.2)+
+  geom_text(x=0,y=-250000,
+            label="250000 DAYS",
+            family="Calibri",
+            size=4,
+            color="darkgoldenrod2",
+            hjust=-0.2)+
+  geom_text(x=0,y=-150000,
+            label="150000 DAYS",
+            family="Calibri",
+            size=4,
+            color="darkgoldenrod2",
+            hjust=0)+
+  coord_polar(start = 3500)+
+  facet_grid(~Continent)+
+  theme_void()+
+  theme(
+    panel.background = element_rect(fill = "#404040", color=NA),
+    plot.background = element_rect(fill = "#404040"),
+    panel.grid.minor = element_blank(),
+    panel.grid.major = element_blank(),
+    plot.title = element_text(size=30),
+    plot.subtitle = element_blank(),
+    strip.text.x = element_text(
+      size=50,
+      color="darkgoldenrod2",
+      family = "Rockwell"),
+    plot.margin = unit(c(6,1,1,1),"cm"))
+
+ok<-ggpubr::ggarrange(plot)
+ggpubr::annotate_figure(ok,
+                top = ggpubr::text_grob("\nNumber of Independence days for single countries \n __________ grouped by continent __________ ", color = "darkgoldenrod2", face = "plain", size = 44,vjust=1.2,family = "Rockwell"),
+                bottom = ggpubr::text_grob("Data source: Wikipedia & TidyTuesday", color = "darkgoldenrod2",
+                                   hjust = 5.6, x = 1, size = 10,vjust = -3,family = "Rockwell"))
+
+ggsave(here("plots","2021_28_holiday.png"),width = 25, height = 9)  
+```
+
