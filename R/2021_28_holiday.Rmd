@@ -91,7 +91,7 @@ ok<-ggpubr::ggarrange(plot)
 ggpubr::annotate_figure(ok,
                 top = ggpubr::text_grob("\nNumber of Independence days for single countries \n __________ grouped by continent __________ ", color = "darkgoldenrod2", face = "plain", size = 44,vjust=1.2,family = "Rockwell"),
                 bottom = ggpubr::text_grob("Data source: Wikipedia & TidyTuesday", color = "darkgoldenrod2",
-                                   hjust = 5.6, x = 1, size = 10,vjust = -3,family = "Rockwell"))
+                                   hjust = 2.8, x = 1, size = 10,vjust = -3,family = "Rockwell"))
 
 ggsave(here("plots","2021_28_holiday.png"),width = 25, height = 9)  
 ```
