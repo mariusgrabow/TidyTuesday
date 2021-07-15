@@ -1,5 +1,8 @@
 # TidyTuesday
 TidyTuesday 
+### [2021/29](https://github.com/mariusgrabow/TidyTuesday/tree/main/plots) Gender inequality in monsters of Scooby-Doo [Kaggle]
+
+![./plots/2021_29/2021_29_scooby_doo.png](https://github.com/mariusgrabow/TidyTuesday/blob/main/plots/2021_29_scooby_doo.png)
 
 ### [2021/28](https://github.com/mariusgrabow/TidyTuesday/tree/main/plots) Number of Independence Days [Wikipedia & TidyTuesday]
 
