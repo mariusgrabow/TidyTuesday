@@ -4,7 +4,7 @@ author: "Marius Grabow"
 date: "13 7 2021"
 output: html_document
 editor_options: 
-  chunk_output_type: console
+  chunk_output_type: inline
 ---
 
 ```{r setup, include=FALSE}
@@ -18,7 +18,7 @@ package.list=c("tidyverse",
                "lubridate",
                "ggstream",
                "waffle",
-               "showtext")
+               "extrafont")
 
 for (package in package.list) {
   if (!require(package, character.only=T, quietly=T)) {
@@ -61,18 +61,18 @@ scooby%>%
     plot.title = element_text(colour = "#373737",
                               family = "Berlin Sans FB Demi",
                               size=25,
-                              hjust = -0.08),
+                              hjust = 1),
     plot.subtitle = element_text(colour = "#b1b1b1",
                                  family = "Berlin Sans FB Demi",
-                                 hjust=0.25,
+                                 hjust=0.05,
                                  size=18),
-    plot.caption = element_text(colour = "#b1b1b1",hjust=3),
+    plot.caption = element_text(colour = "#b1b1b1",hjust=0.5),
     axis.text =element_blank(),
     legend.text = element_text(colour = "#373737",
                                size=15),
     axis.ticks = element_blank()
   )
 
-ggsave(here("plots","2021_29_scooby_doo.png"),width = 12, height = 9,type="ragg",dpi=300)
+ggsave(here("plots","2021_29_scooby_doo.pdf"),width = 12, height = 9,dpi=300,device=cairo_pdf)
 ```
 
