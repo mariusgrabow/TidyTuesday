@@ -63,7 +63,8 @@ olympics%>%
         legend.text = element_text(family="oswald",size=25),
         legend.key.size = unit(1.5,'cm'),
         plot.caption = element_text(family="oswald",size=13,
-                                    hjust=1)
+                                    hjust=1),
+        plot.margin = unit(c(1,1,1,1),"cm")
 )
 
 ggsave(here("plots","2021_31_olympics.pdf"),
