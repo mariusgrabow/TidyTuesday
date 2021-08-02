@@ -52,7 +52,8 @@ olympics%>%
   scale_fill_manual(values = cols)+
   theme_void()+
   labs(title="Olympic Gold Medal changes over time",
-       subtitle = "Changes in proportions of Olympic Gold Medals \nof Top 5 countries of All Time in Olympic Games")+
+       subtitle = "Changes in proportions of Olympic Gold Medals \nof Top 5 countries of All Time in Olympic Games",
+       caption = "\n\nData from Kaggle | Visualisation by Marius Grabow")+
   theme(axis.title.x = element_blank(),
         axis.text.x = element_text(family="oswald",size=25),
         plot.title=element_text(family="oswald",size=50,
@@ -60,7 +61,9 @@ olympics%>%
         plot.subtitle = element_text(family = "oswald",size=30),
         legend.title = element_blank(),
         legend.text = element_text(family="oswald",size=25),
-        legend.key.size = unit(1.5,'cm')
+        legend.key.size = unit(1.5,'cm'),
+        plot.caption = element_text(family="oswald",size=13,
+                                    hjust=1)
 )
 
 ggsave(here("plots","2021_31_olympics.pdf"),
