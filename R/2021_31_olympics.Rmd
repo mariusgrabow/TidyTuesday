@@ -1,0 +1,75 @@
+---
+title: "31_2021_Olympia"
+author: "Marius Grabow"
+date: "2 8 2021"
+output: html_document
+editor_options: 
+  chunk_output_type: inline
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+package.list=c("tidyverse",
+               "here",
+               "wesanderson",
+               "lubridate",
+               "ggstream",
+               "waffle",
+               "showtext",
+               "pdftools")
+
+for (package in package.list) {
+  if (!require(package, character.only=T, quietly=T)) {
+    install.packages(package)
+    library(package, character.only=T)
+  }
+}
+```
+
+```{r}
+olympics <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-07-27/olympics.csv')%>%filter(medal=="Gold")%>%
+  select(team,year)%>%
+  group_by(team,year)%>%
+  summarise(n=n())%>%
+  ungroup()%>%
+  group_by(team)%>%
+  mutate(total=sum(n))%>%
+  filter(team=="United States"|
+         team=="Soviet Union"|
+        team=="Germany"|
+          team=="Italy"|
+          team=="Great Britain")
+
+cols=c("#0085C7","#F4C300","#000000","#009F3D","#DF0024")
+
+font_add_google(name="Oswald",family="oswald")
+
+olympics%>%
+  ggplot(aes(x=year,y=n,fill=team))+
+  geom_stream(color="black",
+              lwd=0.2)+
+  scale_fill_manual(values = cols)+
+  theme_void()+
+  labs(title="Olympic Gold Medal changes over time",
+       subtitle = "Changes in proportions of Olympic Gold Medals \nof Top 5 countries of All Time in Olympic Games")+
+  theme(axis.title.x = element_blank(),
+        axis.text.x = element_text(family="oswald",size=25),
+        plot.title=element_text(family="oswald",size=50,
+                                face="bold"),
+        plot.subtitle = element_text(family = "oswald",size=30),
+        legend.title = element_blank(),
+        legend.text = element_text(family="oswald",size=25),
+        legend.key.size = unit(1.5,'cm')
+)
+
+ggsave(here("plots","2021_31_olympics.pdf"),
+       width = 12, height = 12, device = cairo_pdf)
+
+pdf_convert(pdf = here("plots","2021_31_olympics.pdf"),
+                      filenames = here(
+                      "plots","2021_31_olympics.png"),
+                      format = "png", dpi = 450)
+
+```
+
