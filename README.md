@@ -1,9 +1,6 @@
 # TidyTuesday
 TidyTuesday 
 
-### [2021/32](https://github.com/mariusgrabow/TidyTuesday/tree/main/plots) Paralympics [International Paralympic Committee]
-
-![./plots/2021_32/2021_32_paralympics.png](https://github.com/mariusgrabow/TidyTuesday/blob/main/plots/2021_32_paralympics.png)
 ### [2021/31](https://github.com/mariusgrabow/TidyTuesday/tree/main/plots) Olympics [Kaggle]
 
 ![./plots/2021_31/2021_31_olympics.png](https://github.com/mariusgrabow/TidyTuesday/blob/main/plots/2021_31_olympics.png)
