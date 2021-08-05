@@ -39,6 +39,7 @@ athletes <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/t
 
 cols<-c("#309f3d","#fc3517","#0059d0")
 font_add_google(name="Oswald",family="oswald")
+showtext.auto()
 
 athletes%>%
   ggplot(aes(x=year,y=n,col=country))+
