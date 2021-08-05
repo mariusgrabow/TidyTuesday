@@ -1,5 +1,12 @@
 # TidyTuesday
 TidyTuesday 
+### [2021/32](https://github.com/mariusgrabow/TidyTuesday/tree/main/plots) Paralympics [International Paralympic Committee]
+
+![./plots/2021_32/2021_32_paralympics.png](https://github.com/mariusgrabow/TidyTuesday/blob/main/plots/2021_32_paralympics.png)
+### [2021/31](https://github.com/mariusgrabow/TidyTuesday/tree/main/plots) Olympics [Kaggle]
+
+![./plots/2021_31/2021_31_olympics.png](https://github.com/mariusgrabow/TidyTuesday/blob/main/plots/2021_31_olympics.png)
+
 ### [2021/29](https://github.com/mariusgrabow/TidyTuesday/tree/main/plots) Gender inequality in monsters of Scooby-Doo [Kaggle]
 
 ![./plots/2021_29/2021_29_scooby_doo.png](https://github.com/mariusgrabow/TidyTuesday/blob/main/plots/2021_29_scooby_doo.png)
