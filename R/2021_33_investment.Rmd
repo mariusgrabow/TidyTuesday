@@ -1,0 +1,76 @@
+---
+title: "2021_33_investment"
+author: "Marius Grabow"
+date: "13 8 2021"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+package.list=c("tidyverse",
+               "here",
+               "wesanderson",
+               "showtext",
+               "pdftools",
+               "ggpubr")
+
+for (package in package.list) {
+  if (!require(package, character.only=T, quietly=T)) {
+    install.packages(package)
+    library(package, character.only=T)
+  }
+}
+
+font_add_google(name="Oswald",family="oswald")
+showtext_auto()
+```
+
+```{r}
+chain_investment <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-08-10/chain_investment.csv')%>%mutate(sum=sum(gross_inv_chain))%>%
+  group_by(meta_cat)%>%
+  summarise(gross_inv_chain=sum(gross_inv_chain),
+            percentage=gross_inv_chain*100/147687008)%>%
+  ungroup()%>%
+  arrange(desc(percentage))%>%
+  mutate(factor=factor(percentage),
+         gross_inv_chain=round(gross_inv_chain))
+
+
+ggplot(chain_investment,aes(ymax=gross_inv_chain,ymin=0,xmax=4,xmin=3))+
+  geom_rect(fill="red")+
+  geom_rect(ymin=0,ymax=60000000,fill="red",alpha=0.1)+
+  facet_wrap(~fct_rev(factor),ncol=4)+
+  coord_polar(theta = "y")+
+  ylim(c(0,60000000))+
+  xlim(c(-1, 7))+
+  geom_text(aes(x=6,y=0,label=meta_cat,
+                family="oswald"),size=5)+
+  geom_text(aes(x=-1,y=0,label=gross_inv_chain,
+                family="oswald"),size=6,col="red")+
+  theme_void()+ 
+theme(
+  strip.background = element_blank(),
+  strip.text.x = element_blank(),
+  plot.title=element_text(family="oswald",size=55,
+                                face="bold"),
+  plot.subtitle = element_text(family = "oswald",size=25,hjust=0.5),
+  plot.caption = element_text(family = "oswald",size=15,hjust=1),
+  legend.position = "none",
+  plot.margin = unit(c(1,1,1,1),"cm")
+)+
+  labs(title="U.S. Infrastructure Investments",
+       subtitle = "Gross investment (chained 2021 dollars) in millions of USD",
+       caption="Data from Bureau of Economic Analysis | Visualisation by Marius Grabow")
+
+ggsave(here("plots","2021_33_investments.pdf"),
+       width = 12, height = 12, device = cairo_pdf)
+
+pdf_convert(pdf = here("plots","2021_33_investments.pdf"),
+                      filenames = here(
+                      "plots","2021_33_investments.png"),
+                      format = "png", dpi = 450)
+```
+
