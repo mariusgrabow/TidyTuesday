@@ -1,0 +1,82 @@
+---
+title: "2021_37_formula1"
+author: "Marius Grabow"
+date: "9 9 2021"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+package.list=c("tidyverse",
+               "here",
+               "showtext",
+               "pdftools",
+               "readr",
+               "lubridate",
+               "RColorBrewer",
+               "ggtext")
+
+for (package in package.list) {
+  if (!require(package, character.only=T, quietly=T)) {
+    install.packages(package)
+    library(package, character.only=T)
+  }
+}
+
+font_add_google(name="Bangers",family="bangers")
+showtext_auto()
+
+
+```
+
+```{r}
+
+races<- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-09-07/races.csv')
+
+results<-readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-09-07/results.csv')%>%group_by(raceId)%>%
+  slice(which.min(milliseconds))
+
+fastest<-left_join(races,results,by="raceId")%>%
+  drop_na()%>%
+  mutate(milliseconds=as.numeric(milliseconds),
+         fastestLapTime=milliseconds/laps)%>%
+  group_by(name)%>%
+  arrange(date)%>%
+  mutate(diff=milliseconds-lag(milliseconds,
+         default=first(milliseconds)),
+         date=as.Date(date),
+         faster=if_else(diff<0,TRUE,FALSE))
+
+ggplot(fastest)+
+        geom_tile(aes(x = date, y = 1,width=0.01,col=faster))+
+  scale_x_date(expand = c(0,0))+
+  scale_y_continuous(expand = c(0,0))+
+  theme_void()+
+  scale_color_manual(values=c("TRUE"="#ff8c00",
+                              "FALSE"="#202d85"))+
+  labs(x = NULL,
+       y = NULL,
+       title = "<span style = 'font-size:80pt'>Formula <span style = 'color: #FF1801;'>One</span><br> <span style = 'font-size:20pt'><br>Were average lap times <span style = 'color: #ff8c00;'>faster</span> or <span style = 'color: #202d85;'>slower</span> compared to last race on the same circuit?<br>",
+       caption ="\nData from Ergast API | Visualisation by Marius Grabow")+
+  theme(legend.position = "none",
+        plot.title=element_markdown(family="russo one",size=30,
+                                face="bold",hjust = 0.5),
+        plot.caption = element_text(family="russo one",size=10,
+                                hjust = 0.5),
+        plot.margin = unit(c(1,1,1,1),"cm")
+        )
+
+ggsave(here("plots","2021_37_formula1.pdf"),
+       width = 12, height = 12, device = cairo_pdf)
+
+pdf_convert(pdf = here("plots","2021_37_formula1.pdf"),
+                      filenames = here(
+                      "plots","2021_37_formula1.png"),
+                      format = "png", dpi = 450)
+
+  
+```
+
