@@ -1,0 +1,90 @@
+---
+title: "2021_38_billboard"
+author: "Marius Grabow"
+date: "15/09/2021"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+package.list=c("tidyverse",
+               "here",
+               "showtext",
+               "pdftools",
+               "readr",
+               "lubridate",
+               "RColorBrewer",
+               "ggtext",
+               "ggridges",
+               "extrafont")
+
+for (package in package.list) {
+  if (!require(package, character.only=T, quietly=T)) {
+    install.packages(package)
+    library(package, character.only=T)
+  }
+}
+
+font_add_google(name="Russo one",family="russo one", db_cache = FALSE)
+font_add_google(name="Open Sans",family="open sans")
+showtext::showtext_auto()
+```
+
+```{r}
+audio_features <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-09-14/audio_features.csv')
+
+billboard <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-09-14/Hot%20Stuff.csv')%>%
+  mutate(date=as.Date(WeekID,"%m/%d/%Y"))%>%
+  arrange(date)%>%
+  group_by(Song)%>%
+  summarise(peak=min(`Peak Position`),
+            date=min(date))%>%
+  ungroup()%>%
+  rename(song=Song)
+  
+music<-left_join(billboard,audio_features,by="song")%>%
+  rename(duration=spotify_track_duration_ms)%>%
+  mutate(year=year(date))%>%
+  rename(explicit=spotify_track_explicit)%>%
+  filter(duration>quantile(duration,0.025,na.rm=T),
+         duration<quantile(duration,0.975,na.rm=T))%>%
+  mutate(duration=duration/1000)%>%
+  group_by(year)%>%
+  mutate(median_duration=median(duration))
+
+
+
+ggplot(music,aes(x=date,y=duration))+
+  geom_line(size=1,col="#00592e")+
+  geom_line(data = . %>% filter(explicit %in% c("TRUE")),
+            col="#fa2b00",size=1,alpha=1)+
+  geom_smooth(aes(y=median_duration),col="#9dba38",size=1.5)+
+  labs(title = "<span style = 'font-size:90pt'>Billboard TOP 100</span><br> <span style = 'font-size:20pt'><br><span style = 'color: #9dba38;'>median</span> Track durations get shorter (again), but feature more <span style = 'color: #fa2b00;'>explicit content</span> lately<br> ",
+       caption ="\n\nData from Data.World, Billboard.com & Spotify | Visualisation by Marius Grabow",
+       x=NULL,
+       y="track duration in seconds\n")+
+  scale_y_continuous(breaks = seq(100, 400, 50))+
+  theme(legend.position = "none",
+        plot.title=element_markdown(family="bangers",size=30,
+                                face="bold",hjust = 0.5),
+        plot.caption = element_text(family="open sans",size=8,
+                                hjust = 0.5),
+        plot.margin = unit(c(1,1,1,1),"cm"),
+        axis.title = element_text(family="open sans", size=16),
+        axis.text = element_text(family="open sans",size=12,face="bold"),
+        panel.grid =  element_blank(),
+        panel.background = element_blank()
+        )
+  
+ggsave(here("plots","2021_38_billboard.pdf"),
+       width = 12, height = 12, device = cairo_pdf)
+
+pdf_convert(pdf = here("plots","2021_38_billboard.pdf"),
+                      filenames = here(
+                      "plots","2021_38_billboard.png"),
+                      format = "png", dpi = 450)
+```
+
