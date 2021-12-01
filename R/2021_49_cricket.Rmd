@@ -1,0 +1,95 @@
+---
+title: "2021_49_cricket"
+author: "Marius Grabow"
+date: "01/12/2021"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+package.list=c("tidyverse",
+               "here",
+               "showtext",
+               "pdftools",
+               "readr",
+               "RColorBrewer",
+               "ggtext",
+               "scico")
+
+for (package in package.list) {
+  if (!require(package, character.only=T, quietly=T)) {
+    install.packages(package)
+    library(package, character.only=T)
+  }
+}
+
+font_add_google(name="Bangers",family="bangers")
+font_add_google("Roboto Slab","roboto slab")
+font_add_google("Bungee","bungee")
+showtext_auto()
+
+```
+
+```{r}
+cricket<-readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-11-30/matches.csv')%>% 
+  mutate(
+    year=as.numeric(str_sub(match_date,-4,-1)),
+    winner = if_else(winner == team1, "team1", "team2"),
+    winner_home_away = if_else(
+      (winner == "team1" & team1_away_or_home == "home") |(winner == "team2" & team2_home_away == "home"),
+      "home team wins","away team wins"
+    ))%>%
+  group_by(year,winner_home_away)%>%
+  summarise(n=n())%>%
+  group_by(year)%>%
+  mutate(diff=first(n)-last(n),
+         minimum=min(n),
+         maximum=max(n))
+
+ 
+
+ggplot(cricket)+
+  geom_linerange(aes(x=as.factor(year),
+                     ymin=0,ymax=maximum,group=winner_home_away),
+                 size=12,col=pal[1])+
+  geom_linerange(aes(x=as.factor(year),
+                 ymin=minimum*-1,ymax=0,group=winner_home_away),
+                 size=12,col=pal[4])+
+  geom_point(data=cricket%>%filter(diff>=0),aes(x=as.factor(year), y=diff), size=18, shape=18, col=pal[1])+
+  geom_point(data=cricket%>%filter(diff<=0),aes(x=as.factor(year), y=diff), size=18, shape=18, col=pal[4])+
+  geom_text(aes(x = as.factor(year), y = diff, label = diff),
+            size=6,family="roboto slab",fontface="bold")+
+  theme_void()+
+  xlab("\nYear")+
+  ylab("Games won by away team\n")+
+  labs(title = "<span style = 'font-size:47pt'>Cricket world cup winners<br> ",
+       subtitle = "<span style = 'font-size:16pt'>Away teams are regularly <span style = 'color: #3B9AB2;'>winning</span> more games than <span style = 'color: #E1AF00;'>losing</span> against home teams<br> ",
+       caption ="\nData from ESPN Cricinfo | Visualisation by Marius Grabow")+
+  theme(axis.text = element_text(family = "roboto slab",size=18),
+        axis.title = element_text(family = "bungee",size=25),
+        axis.title.y = element_text(angle = 90),
+        plot.title=element_markdown(family="bungee",size=30,
+                                face="bold",hjust = 0),
+        plot.subtitle=element_markdown(family="bungee",size=20,
+                                face="bold",hjust = 0),
+        plot.caption = element_text(family = "roboto slab",size=12), 
+        plot.margin = unit(c(1,1,1,1),"cm"))+
+  annotate("text", x = as.factor(2001), y = 105,
+           label = "win loss delta \u394",
+           size = 6,family="roboto slab",fontface="bold")+
+  annotate("curve", x = as.factor(2001), xend = as.factor(1999),
+           y = 100, yend = 78, size = 1.6, arrow = arrow(length = unit(0.1, "cm")),
+           curvature = -0.15, colour = "black")
+
+ggsave(here("plots","2021_49_cricket.pdf"),
+       width = 12, height = 12, device = cairo_pdf)
+
+pdf_convert(pdf = here("plots","2021_49_cricket.pdf"),
+                      filenames = here(
+                      "plots","2021_49_cricket.png"),
+                      format = "png", dpi = 450)
+
+```
