@@ -17,7 +17,7 @@ package.list=c("tidyverse",
                "readr",
                "RColorBrewer",
                "ggtext",
-               "scico")
+               "wesanderson")
 
 for (package in package.list) {
   if (!require(package, character.only=T, quietly=T)) {
@@ -31,6 +31,7 @@ font_add_google("Roboto Slab","roboto slab")
 font_add_google("Bungee","bungee")
 showtext_auto()
 
+pal<-wes_palette("Zissou1")
 ```
 
 ```{r}
@@ -65,8 +66,8 @@ ggplot(cricket)+
   theme_void()+
   xlab("\nYear")+
   ylab("Games won by home team\n")+
-  labs(title = "<span style = 'font-size:47pt'>Cricket world cup winners<br> ",
-       subtitle = "<span style = 'font-size:16pt'>Home teams are regularly <span style = 'color: #3B9AB2;'>winning</span> more games than <span style = 'color: #E1AF00;'>losing</span> against away teams<br> ",
+  labs(title = "<span style = 'font-size:44pt'>Cricket world cup winners<br> ",
+       subtitle = "<span style = 'font-size:14pt'>Home teams are regularly <span style = 'color: #3B9AB2;'>winning</span> more games than <span style = 'color: #E1AF00;'>losing</span> against away teams<br> ",
        caption ="\nData from ESPN Cricinfo | Visualisation by Marius Grabow")+
   theme(axis.text = element_text(family = "roboto slab",size=18),
         axis.title = element_text(family = "bungee",size=25),
