@@ -1,0 +1,94 @@
+---
+title: "2021_52_starbucks"
+author: "Marius Grabow"
+date: "21/12/2021"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+package.list=c("tidyverse",
+               "here",
+               "showtext",
+               "pdftools",
+               "extrafont",
+               "directlabels")
+
+for (package in package.list) {
+  if (!require(package, character.only=T, quietly=T)) {
+    install.packages(package)
+    library(package, character.only=T)
+  }
+}
+
+font_add_google("Martel Sans","martel sans")
+showtext_auto()
+
+
+
+sbgreen<-"#00704A"
+sbblack<-"#27251F"
+```
+
+```{r}
+starbucks <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-12-21/starbucks.csv')
+
+starbucks<-
+  starbucks%>%
+  mutate(mg_ml=caffeine_mg/serv_size_m_l)%>%
+  filter(size=="tall" | size=="grande"| size=="venti",
+         mg_ml>=0.6)%>%
+  mutate(product_name=gsub("-","\n -",product_name),
+         product_name=gsub("Clover","\nClover",product_name),
+         product_name=word(product_name , 1  , -2))
+  
+
+starbucks$size <- factor(starbucks$size, levels=c("tall", "grande", "venti"))
+
+ggplot(data=starbucks,aes(x=size,y=mg_ml,group=product_name))+
+  geom_line(col="white",size=2)+
+  scale_x_discrete(expand = c(0,0))+
+  expand_limits(x=4.5)+
+  geom_text(
+    data=filter(starbucks,size=="venti"),
+    aes(y=mg_ml,label=product_name),family = "martel sans", 
+          color="white",size=7,lineheight=0.7,hjust=-0.1,fontface="bold"
+  )+
+  labs(title="Less is More,",
+       subtitle = "but not at Starbucks! As a caffeine \naddict, you better check caffeine \ncontent before ordering\n",
+       y="caffeine mg/mL\n")+
+  theme(panel.background = element_rect(fill=sbgreen),
+        plot.background = element_rect(fill=sbgreen,color = sbblack,size=10),
+        panel.grid = element_blank(),
+        panel.border = element_blank(),
+        axis.text.y = element_text(
+          family = "martel sans", color="white",size=25),
+        axis.text.x = element_text(
+          family = "martel sans", color="white",size=25,vjust=-0.5),
+        axis.title.y  = element_text(
+          family = "martel sans", color="white",size =25),
+        axis.title.x = element_blank(),
+        plot.margin = unit(c(1,1,1,1),"cm"),
+        plot.title = element_text(
+          family = "martel sans", 
+          color="white",size=105,
+        face="bold"),
+        plot.subtitle = element_text(
+          family = "martel sans", 
+          color="white",size=40),
+        
+        )
+
+
+ggsave(here("plots","2021_52_starbucks.pdf"),
+       width = 12, height = 12, device = cairo_pdf)
+
+pdf_convert(pdf = here("plots","2021_52_starbucks.pdf"),
+                      filenames = here(
+                      "plots","2021_52_starbucks.png"),
+                      format = "png", dpi = 450)
+```
+
